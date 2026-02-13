@@ -34,5 +34,20 @@ namespace SistemaEstoque.Api.Controllers
 
             return CreatedAtAction(nameof(GetCategorias), new { id = categoria.Id }, categoria);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategoria(int id)
+        {
+            var categoria = await _context.Categorias.FindAsync(id);
+
+            if (categoria == null)
+                return NotFound();
+
+            _context.Categorias.Remove(categoria);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
     }
 }

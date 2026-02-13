@@ -34,9 +34,7 @@ namespace SistemaEstoque.Api.Controllers
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (produto == null)
-            {
                 return NotFound();
-            }
 
             return produto;
         }
@@ -60,16 +58,12 @@ namespace SistemaEstoque.Api.Controllers
         public async Task<IActionResult> UpdateProduto(int id, Produto produto)
         {
             if (id != produto.Id)
-            {
                 return BadRequest();
-            }
 
             var produtoExistente = await _context.Produtos.FindAsync(id);
 
             if (produtoExistente == null)
-            {
                 return NotFound();
-            }
 
             produtoExistente.Nome = produto.Nome;
             produtoExistente.Preco = produto.Preco;
@@ -88,9 +82,7 @@ namespace SistemaEstoque.Api.Controllers
             var produto = await _context.Produtos.FindAsync(id);
 
             if (produto == null)
-            {
                 return NotFound();
-            }
 
             _context.Produtos.Remove(produto);
             await _context.SaveChangesAsync();
