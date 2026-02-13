@@ -8,57 +8,87 @@
             margin: 40px;
         }
 
-        input {
+        input, select {
             margin: 5px;
+            padding: 5px;
         }
 
         button {
             margin: 5px;
+            padding: 5px 10px;
         }
 
         table {
             border-collapse: collapse;
             margin-top: 20px;
+            width: 100%;
         }
 
         th, td {
             border: 1px solid black;
             padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
 
-    <h1>Sistema de Estoque</h1>
+<h1>Sistema de Estoque</h1>
 
-    <h2>Cadastrar Produto</h2>
+<h2>Cadastrar Produto</h2>
 
-    <input type="text" id="nome" placeholder="Nome" />
-    <input type="number" id="preco" placeholder="Preço" />
-    <input type="number" id="estoque" placeholder="Estoque" />
-    <button onclick="criarProduto()">Salvar</button>
+<input type="text" id="nome" placeholder="Nome" />
+<input type="number" id="preco" placeholder="Preço" step="0.01" />
+<input type="number" id="estoque" placeholder="Estoque" />
 
-    <h2>Lista de Produtos</h2>
+<select id="categoriaSelect"></select>
 
-    <button onclick="listarProdutos()">Atualizar Lista</button>
+<button onclick="criarProduto()">Salvar</button>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Preço</th>
-                <th>Estoque</th>
-            </tr>
-        </thead>
-        <tbody id="tabelaProdutos"></tbody>
-    </table>
+<h2>Lista de Produtos</h2>
+
+<button onclick="listarProdutos()">Atualizar Lista</button>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Preço</th>
+            <th>Estoque</th>
+            <th>Categoria</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="tabelaProdutos"></tbody>
+</table>
 
 <script>
-    const apiUrl = "https://localhost:7130/api/Produtos";
+    const apiProdutos = "https://localhost:7130/api/Produtos";
+    const apiCategorias = "https://localhost:7130/api/Categorias";
+
+    async function carregarCategorias() {
+        const response = await fetch(apiCategorias);
+        const categorias = await response.json();
+
+        const select = document.getElementById("categoriaSelect");
+        select.innerHTML = "";
+
+        categorias.forEach(cat => {
+            select.innerHTML += `
+                <option value="${cat.id}">
+                    ${cat.nome}
+                </option>
+            `;
+        });
+    }
 
     async function listarProdutos() {
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiProdutos);
         const produtos = await response.json();
 
         const tabela = document.getElementById("tabelaProdutos");
@@ -71,6 +101,12 @@
                     <td>${produto.nome}</td>
                     <td>${produto.preco}</td>
                     <td>${produto.estoque}</td>
+                    <td>${produto.categoria ? produto.categoria.nome : "-"}</td>
+                    <td>
+                        <button onclick="deletarProduto(${produto.id})">
+                            Remover
+                        </button>
+                    </td>
                 </tr>
             `;
         });
@@ -80,17 +116,35 @@
         const nome = document.getElementById("nome").value;
         const preco = parseFloat(document.getElementById("preco").value);
         const estoque = parseInt(document.getElementById("estoque").value);
+        const categoriaId = parseInt(document.getElementById("categoriaSelect").value);
 
-        await fetch(apiUrl, {
+        await fetch(apiProdutos, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ nome, preco, estoque })
+            body: JSON.stringify({
+                nome,
+                preco,
+                estoque,
+                categoriaId
+            })
         });
 
         listarProdutos();
     }
+
+    async function deletarProduto(id) {
+        await fetch(`${apiProdutos}/${id}`, {
+            method: "DELETE"
+        });
+
+        listarProdutos();
+    }
+
+    // Carregar ao abrir a página
+    carregarCategorias();
+    listarProdutos();
 </script>
 
 </body>
