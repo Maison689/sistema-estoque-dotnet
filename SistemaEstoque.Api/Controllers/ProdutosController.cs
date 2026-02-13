@@ -32,5 +32,46 @@ namespace SistemaEstoque.Api.Controllers
 
             return CreatedAtAction(nameof(GetProdutos), new { id = produto.Id }, produto);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduto(int id)
+        {
+            var produto = await _context.Produtos.FindAsync(id);
+
+            if (produto == null)
+            {
+                return NotFound();
+            }
+
+            _context.Produtos.Remove(produto);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduto(int id, Produto produto)
+        {
+            if (id != produto.Id)
+            {
+                return BadRequest();
+            }
+
+            var produtoExistente = await _context.Produtos.FindAsync(id);
+
+            if (produtoExistente == null)
+            {
+                return NotFound();
+            }
+
+            produtoExistente.Nome = produto.Nome;
+            produtoExistente.Preco = produto.Preco;
+            produtoExistente.Estoque = produto.Estoque;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
     }
 }
